@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>夢話 - ゆめばなし</title>
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0A0C12" />
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap');
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: radial-gradient(circle at 50% 0%, #171A22 0%, #0A0C12 60%);
+    color: #E5E1D8;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    min-height: 100vh;
+  }
+  body { display: flex; flex-direction: column; align-items: center; padding: 0 20px 60px; }
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); opacity: 0.85; }
+    50% { transform: scale(1.06); opacity: 1; }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .breathe { animation: breathe 4.5s ease-in-out infinite; }
+  .fade-up { animation: fadeUp 0.5s ease both; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #2A2E38; border-radius: 3px; }
+
+  header { display: flex; align-items: center; gap: 10px; padding: 28px 0 8px; width: 100%; max-width: 420px; justify-content: center; position: relative; }
+  .header-title { font-family: 'Shippori Mincho', serif; font-size: 26px; font-weight: 700; letter-spacing: 0.08em; color: #D9CBA8; }
+  .header-sub { font-size: 12px; color: #6B6E78; letter-spacing: 0.15em; }
+  .settings-btn { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); background: transparent; border: 1px solid #22252E; border-radius: 8px; color: #6B6E78; width: 34px; height: 34px; font-size: 15px; cursor: pointer; }
+
+  main { width: 100%; max-width: 420px; display: flex; flex-direction: column; align-items: center; margin-top: 24px; }
+
+  .settings-panel { width: 100%; background: #12141B; border: 1px solid #22252E; border-radius: 14px; padding: 20px 20px 18px; margin-top: 8px; display: none; }
+  .settings-panel.open { display: block; }
+  .settings-label { font-family: 'Shippori Mincho', serif; font-size: 15px; color: #D9CBA8; margin: 0 0 8px; }
+  .settings-hint { font-size: 12px; color: #7A7C84; line-height: 1.7; margin: 0 0 14px; }
+  .settings-input { width: 100%; background: #0E1016; border: 1px solid #2A2E38; border-radius: 8px; color: #E5E1D8; padding: 12px 14px; font-size: 14px; outline: none; }
+  .settings-row { display: flex; gap: 10px; margin-top: 14px; }
+  .settings-save { flex: 1; padding: 12px 0; border-radius: 10px; border: none; background: #D9CBA8; color: #14161D; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .settings-cancel { flex: 1; padding: 12px 0; border-radius: 10px; border: 1px solid #2A2E38; background: transparent; color: #8A8C94; font-size: 14px; cursor: pointer; display: none; }
+  .settings-cancel.show { display: block; }
+
+  .orb { width: 160px; height: 160px; border-radius: 50%; border: 1px solid rgba(201,184,150,0.35); background: radial-gradient(circle at 35% 30%, #2A2E3A 0%, #14161D 70%); color: #D9CBA8; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s ease, box-shadow 0.15s ease; outline: none; box-shadow: 0 0 40px 6px rgba(201,184,150,0.12); }
+  .orb:disabled { opacity: 0.6; cursor: default; }
+  .orb-label { font-size: 14px; letter-spacing: 0.05em; padding: 0 20px; text-align: center; }
+  .hint { margin-top: 22px; font-size: 13px; color: #8A8C94; text-align: center; line-height: 1.7; max-width: 300px; }
+  .notice { font-size: 13px; color: #C99A8A; text-align: center; max-width: 320px; line-height: 1.6; }
+  .transcript-box { margin-top: 20px; width: 100%; background: #12141B; border: 1px solid #22252E; border-radius: 12px; padding: 16px 18px; display: none; }
+  .transcript-box.show { display: block; }
+  .transcript-text { font-size: 14px; line-height: 1.8; color: #B9BAC2; margin: 0; white-space: pre-wrap; }
+
+  .result-wrap { width: 100%; display: none; flex-direction: column; gap: 14px; }
+  .result-wrap.show { display: flex; }
+  .result-transcript { font-size: 13px; color: #6B6E78; font-style: italic; line-height: 1.7; margin-bottom: 4px; }
+  .card { background: #12141B; border: 1px solid #22252E; border-radius: 14px; padding: 18px 20px; }
+  .card-title { font-family: 'Shippori Mincho', serif; font-size: 16px; color: #D9CBA8; margin: 0 0 10px; letter-spacing: 0.04em; }
+  .card-body { font-size: 14px; line-height: 1.9; color: #D6D3CB; margin: 0; white-space: pre-wrap; }
+  .new-button { margin-top: 8px; padding: 14px 0; border-radius: 12px; border: 1px solid rgba(201,184,150,0.35); background: transparent; color: #D9CBA8; font-size: 14px; cursor: pointer; }
+
+  .history-toggle { margin-top: 40px; background: transparent; border: none; color: #6B6E78; font-size: 13px; cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+  .history-list { width: 100%; margin-top: 16px; display: none; flex-direction: column; gap: 8px; padding-bottom: 20px; }
+  .history-list.show { display: flex; }
+  .history-empty { font-size: 13px; color: #5A5C64; text-align: center; }
+  .history-item { background: #12141B; border: 1px solid #1E212A; border-radius: 10px; overflow: hidden; }
+  .history-header { width: 100%; display: flex; justify-content: space-between; gap: 12px; background: transparent; border: none; color: #B9BAC2; padding: 12px 14px; font-size: 12px; cursor: pointer; text-align: left; }
+  .history-date { color: #6B6E78; flex-shrink: 0; }
+  .history-preview { color: #B9BAC2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .history-body { padding: 0 14px 16px; border-top: 1px solid #1E212A; display: none; }
+  .history-body.show { display: block; }
+  .history-section-title { font-family: 'Shippori Mincho', serif; font-size: 13px; color: #D9CBA8; margin: 12px 0 4px; }
+  .history-section-body { font-size: 13px; line-height: 1.8; color: #B9BAC2; margin: 0; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="header-title">夢話</span>
+  <span class="header-sub">ゆめばなし</span>
+  <button class="settings-btn" id="settingsBtn" aria-label="設定">⚙</button>
+</header>
+
+<main>
+  <div class="settings-panel" id="settingsPanel">
+    <p class="settings-label">Anthropic APIキー</p>
+    <p class="settings-hint">この端末にだけ保存され、GitHubには送信されません。console.anthropic.com で発行できます。</p>
+    <input type="password" id="keyInput" class="settings-input" placeholder="sk-ant-..." />
+    <div class="settings-row">
+      <button class="settings-save" id="saveKeyBtn">保存</button>
+      <button class="settings-cancel" id="cancelKeyBtn">閉じる</button>
+    </div>
+  </div>
+
+  <p class="notice" id="unsupportedNotice" style="display:none;">このブラウザは音声入力に対応していません。Chromeなど対応ブラウザでお試しください。</p>
+  <p class="notice" id="micErrorNotice" style="display:none;"></p>
+  <p class="notice" id="apiErrorNotice" style="display:none;">診断中にエラーが起きました。もう一度試してください。</p>
+
+  <div id="mainInteraction">
+    <button class="orb" id="orbBtn">
+      <span class="orb-label" id="orbLabel">タップして話す</span>
+    </button>
+    <p class="hint" id="hintText">目が覚めたら、そのまましゃべってください。うまく話せなくても大丈夫です。</p>
+    <div class="transcript-box" id="transcriptBox">
+      <p class="transcript-text" id="transcriptText"></p>
+    </div>
+  </div>
+
+  <div class="result-wrap" id="resultWrap">
+    <p class="result-transcript" id="resultTranscript"></p>
+    <div id="resultCards"></div>
+    <button class="new-button" id="newDreamBtn">新しい夢を記録する</button>
+  </div>
+
+  <button class="history-toggle" id="historyToggle">これまでの夢 (0)</button>
+  <div class="history-list" id="historyList"></div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var SYSTEM_PROMPT = [
+    "あなたはユング心理学に基づく夢分析の専門家です。長年の臨床経験を持ち、日々研鑽を続けているプロフェッショナルとして、送られてくる夢の内容を分析してください。",
+    "",
+    "【入力について】",
+    "入力される文章は、就寝直後、寝ぼけた状態で音声入力されたものです。支離滅裂だったり、言い淀み、言い直し、単語の羅列、文法の乱れが含まれることがあります。字面通りの意味だけでなく、話者が本当に伝えたかったであろう情景を巧みに汲み取ってください。曖昧な部分は前後の文脈から最も自然な解釈を採用し、聞き返す代わりに、あなたの専門的な判断で意味を補って分析を進めてください。断片的な単語の羅列であっても、そこから情景を再構成し、必ず分析を完成させてください。",
+    "",
+    "【分析の手順】",
+    "1. 象徴の抽出:夢に登場した人物・場所・行動・物などを、心理学的に意味のあるシンボルとして抽出する",
+    "2. 心理的な解釈:ユング心理学(元型・自己統合・影・アニマ/アニムスなど)を踏まえて、それぞれの象徴が何を表しているかを解釈する",
+    "3. 今の生活へのメッセージ:分析結果を踏まえて、今の生活や心理状態に対する具体的なメッセージを伝える",
+    "",
+    "各解釈には、なぜそう考えられるかという根拠を一言添え、単なる当てずっぽうにならないようにしてください。誠実で、温かみのある、寄り添うような文体で。専門用語を使う場合は補足してください。",
+    "",
+    "【出力形式】",
+    "前置きや挨拶なしで、以下の見出しで固定して出力してください:",
+    "■象徴の抽出",
+    "■心理的な解釈",
+    "■今の生活へのメッセージ"
+  ].join("\n");
+
+  var MARKS = ["■象徴の抽出", "■心理的な解釈", "■今の生活へのメッセージ"];
+
+  /* ---------- state ---------- */
+  var phase = "idle"; // idle | listening | processing | result | error
+  var finalText = "";
+  var interimText = "";
+  var recognition = null;
+  var shouldListen = false;
+  var restartTimer = null;
+  var apiKey = localStorage.getItem("dream_api_key") || "";
+  var audioCtx = null;
+  var stream = null;
+  var rafId = null;
+  var history = [];
+  var expandedId = null;
+
+  /* ---------- elements ---------- */
+  var el = {
+    settingsBtn: document.getElementById("settingsBtn"),
+    settingsPanel: document.getElementById("settingsPanel"),
+    keyInput: document.getElementById("keyInput"),
+    saveKeyBtn: document.getElementById("saveKeyBtn"),
+    cancelKeyBtn: document.getElementById("cancelKeyBtn"),
+    unsupportedNotice: document.getElementById("unsupportedNotice"),
+    micErrorNotice: document.getElementById("micErrorNotice"),
+    apiErrorNotice: document.getElementById("apiErrorNotice"),
+    mainInteraction: document.getElementById("mainInteraction"),
+    orbBtn: document.getElementById("orbBtn"),
+    orbLabel: document.getElementById("orbLabel"),
+    hintText: document.getElementById("hintText"),
+    transcriptBox: document.getElementById("transcriptBox"),
+    transcriptText: document.getElementById("transcriptText"),
+    resultWrap: document.getElementById("resultWrap"),
+    resultTranscript: document.getElementById("resultTranscript"),
+    resultCards: document.getElementById("resultCards"),
+    newDreamBtn: document.getElementById("newDreamBtn"),
+    historyToggle: document.getElementById("historyToggle"),
+    historyList: document.getElementById("historyList"),
+  };
+
+  /* ---------- storage ---------- */
+  function loadHistory() {
+    var entries = [];
+    for (var i = 0; i < localStorage.length; i++) {
+      var k = localStorage.key(i);
+      if (k && k.indexOf("dream:") === 0) {
+        try { entries.push(JSON.parse(localStorage.getItem(k))); } catch (e) {}
+      }
+    }
+    entries.sort(function (a, b) { return b.timestamp - a.timestamp; });
+    history = entries;
+    renderHistoryToggle();
+    if (el.historyList.classList.contains("show")) renderHistoryList();
+  }
+
+  function saveDream(entry) {
+    localStorage.setItem(entry.id, JSON.stringify(entry));
+    history.unshift(entry);
+    renderHistoryToggle();
+  }
+
+  /* ---------- settings ---------- */
+  function openSettings() {
+    el.keyInput.value = "";
+    el.settingsPanel.classList.add("open");
+    el.cancelKeyBtn.classList.toggle("show", !!apiKey);
+    el.mainInteraction.style.display = "none";
+    el.resultWrap.classList.remove("show");
+    el.historyToggle.style.display = "none";
+    el.historyList.classList.remove("show");
+  }
+  function closeSettings() {
+    el.settingsPanel.classList.remove("open");
+    el.mainInteraction.style.display = "block";
+    el.historyToggle.style.display = "inline-block";
+  }
+  el.settingsBtn.addEventListener("click", openSettings);
+  el.cancelKeyBtn.addEventListener("click", closeSettings);
+  el.saveKeyBtn.addEventListener("click", function () {
+    var v = el.keyInput.value.trim();
+    if (!v) return;
+    apiKey = v;
+    localStorage.setItem("dream_api_key", v);
+    closeSettings();
+  });
+  el.keyInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") el.saveKeyBtn.click();
+  });
+
+  /* ---------- speech recognition ---------- */
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var supported = !!SR;
+  if (!supported) {
+    el.unsupportedNotice.style.display = "block";
+    el.orbBtn.disabled = true;
+  } else {
+    recognition = new SR();
+    recognition.lang = "ja-JP";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = function (event) {
+      var interim = "";
+      var final = "";
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        var t = event.results[i][0].transcript;
+        if (event.results[i].isFinal) final += t;
+        else interim += t;
+      }
+      if (final) finalText += final;
+      interimText = interim;
+      updateTranscriptDisplay();
+    };
+
+    recognition.onerror = function (event) {
+      if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+        shouldListen = false;
+        showMicError("マイクの使用が許可されていません。ブラウザの設定を確認してください。");
+        setPhase("idle");
+      }
+    };
+
+    recognition.onend = function () {
+      if (shouldListen) {
+        clearTimeout(restartTimer);
+        restartTimer = setTimeout(function () {
+          if (shouldListen) {
+            try { recognition.start(); } catch (e) {}
+          }
+        }, 300);
+      }
+    };
+  }
+
+  function startVolumeMeter() {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (s) {
+      stream = s;
+      var AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new AudioContext();
+      var source = audioCtx.createMediaStreamSource(stream);
+      var analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 256;
+      source.connect(analyser);
+      var data = new Uint8Array(analyser.frequencyBinCount);
+      function tick() {
+        analyser.getByteFrequencyData(data);
+        var sum = 0;
+        for (var i = 0; i < data.length; i++) sum += data[i];
+        var avg = sum / data.length;
+        var volume = Math.min(1, avg / 90);
+        applyOrbVolume(volume);
+        rafId = requestAnimationFrame(tick);
+      }
+      tick();
+    }).catch(function () { /* decorative only */ });
+  }
+
+  function stopVolumeMeter() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; }
+    if (audioCtx) { audioCtx.close().catch(function(){}); audioCtx = null; }
+    applyOrbVolume(0);
+  }
+
+  function applyOrbVolume(volume) {
+    if (phase !== "listening") return;
+    var scale = 1 + volume * 0.35;
+    el.orbBtn.style.transform = "scale(" + scale + ")";
+    el.orbBtn.style.boxShadow = "0 0 " + (30 + volume * 60) + "px " + (8 + volume * 10) + "px rgba(201,184,150," + (0.18 + volume * 0.25) + ")";
+  }
+
+  function updateTranscriptDisplay() {
+    var live = (finalText + (interimText ? " " + interimText : "")).trim();
+    if ((phase === "listening" || phase === "processing") && live) {
+      el.transcriptText.textContent = live;
+      el.transcriptBox.classList.add("show");
+    } else {
+      el.transcriptBox.classList.remove("show");
+    }
+  }
+
+  function showMicError(msg) {
+    el.micErrorNotice.textContent = msg;
+    el.micErrorNotice.style.display = "block";
+  }
+  function clearMicError() {
+    el.micErrorNotice.style.display = "none";
+  }
+
+  /* ---------- phase / UI ---------- */
+  function setPhase(p) {
+    phase = p;
+    el.orbBtn.classList.remove("breathe");
+    el.orbBtn.disabled = !supported || phase === "processing";
+    el.apiErrorNotice.style.display = "none";
+
+    if (phase === "idle") {
+      el.orbLabel.textContent = "タップして話す";
+      el.hintText.textContent = "目が覚めたら、そのまましゃべってください。うまく話せなくても大丈夫です。";
+      el.orbBtn.classList.add("breathe");
+      el.orbBtn.style.boxShadow = "0 0 40px 6px rgba(201,184,150,0.12)";
+      el.orbBtn.style.transform = "scale(1)";
+      el.mainInteraction.style.display = "block";
+      el.resultWrap.classList.remove("show");
+    } else if (phase === "listening") {
+      el.orbLabel.textContent = "タップして終了";
+      el.hintText.textContent = "聞いています…話し終えたらもう一度タップ";
+      el.mainInteraction.style.display = "block";
+      el.resultWrap.classList.remove("show");
+    } else if (phase === "processing") {
+      el.orbLabel.textContent = "診断中…";
+      el.hintText.textContent = "夢を読み解いています";
+    } else if (phase === "error") {
+      el.orbLabel.textContent = "タップして話す";
+      el.hintText.textContent = "目が覚めたら、そのまましゃべってください。うまく話せなくても大丈夫です。";
+      el.apiErrorNotice.style.display = "block";
+      el.mainInteraction.style.display = "block";
+      el.resultWrap.classList.remove("show");
+    }
+    updateTranscriptDisplay();
+  }
+
+  function startListening() {
+    clearMicError();
+    finalText = "";
+    interimText = "";
+    shouldListen = true;
+    setPhase("listening");
+    try { recognition.start(); } catch (e) {}
+    startVolumeMeter();
+  }
+
+  function stopListening() {
+    shouldListen = false;
+    clearTimeout(restartTimer);
+    if (recognition) { try { recognition.stop(); } catch (e) {} }
+    stopVolumeMeter();
+  }
+
+  el.orbBtn.addEventListener("click", function () {
+    if (phase === "idle" || phase === "result" || phase === "error") {
+      startListening();
+    } else if (phase === "listening") {
+      stopListening();
+      runDiagnosis();
+    }
+  });
+
+  /* ---------- diagnosis ---------- */
+  function parseSections(text) {
+    var result = {};
+    for (var i = 0; i < MARKS.length; i++) {
+      var start = text.indexOf(MARKS[i]);
+      if (start === -1) continue;
+      var nextMark = MARKS[i + 1];
+      var end = nextMark ? text.indexOf(nextMark) : text.length;
+      if (end === -1) end = text.length;
+      result[MARKS[i]] = text.slice(start + MARKS[i].length, end).trim();
+    }
+    return result;
+  }
+
+  function runDiagnosis() {
+    var transcript = (finalText + " " + interimText).trim();
+    if (!transcript) { setPhase("idle"); return; }
+    if (!apiKey) { openSettings(); setPhase("idle"); return; }
+    setPhase("processing");
+
+    fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: transcript }]
+      })
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (data.error) throw new Error(data.error.message || "API error");
+      var text = (data.content || []).map(function (b) { return b.type === "text" ? b.text : ""; }).join("\n").trim();
+      if (!text) throw new Error("empty response");
+      var sections = parseSections(text);
+      var hasSections = Object.keys(sections).length > 0;
+      var entry = {
+        id: "dream:" + Date.now(),
+        timestamp: Date.now(),
+        transcript: transcript,
+        sections: sections,
+        raw: text,
+        hasSections: hasSections
+      };
+      showResult(entry);
+      saveDream(entry);
+    })
+    .catch(function () {
+      setPhase("error");
+    });
+  }
+
+  function showResult(entry) {
+    el.resultTranscript.textContent = "「" + entry.transcript + "」";
+    el.resultCards.innerHTML = "";
+    if (entry.hasSections) {
+      MARKS.forEach(function (mark) {
+        if (!entry.sections[mark]) return;
+        var card = document.createElement("div");
+        card.className = "card";
+        var h3 = document.createElement("h3");
+        h3.className = "card-title";
+        h3.textContent = mark.replace("■", "");
+        var p = document.createElement("p");
+        p.className = "card-body";
+        p.textContent = entry.sections[mark];
+        card.appendChild(h3);
+        card.appendChild(p);
+        el.resultCards.appendChild(card);
+      });
+    } else {
+      var card = document.createElement("div");
+      card.className = "card";
+      var p = document.createElement("p");
+      p.className = "card-body";
+      p.textContent = entry.raw;
+      card.appendChild(p);
+      el.resultCards.appendChild(card);
+    }
+    el.mainInteraction.style.display = "none";
+    el.resultWrap.classList.add("show", "fade-up");
+    phase = "result";
+  }
+
+  el.newDreamBtn.addEventListener("click", function () {
+    setPhase("idle");
+  });
+
+  /* ---------- history ---------- */
+  function formatDate(ts) {
+    var d = new Date(ts);
+    var pad = function (n) { return String(n).padStart(2, "0"); };
+    return (d.getMonth() + 1) + "月" + d.getDate() + "日 " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  }
+
+  function renderHistoryToggle() {
+    el.historyToggle.textContent = el.historyList.classList.contains("show")
+      ? "履歴を閉じる"
+      : "これまでの夢 (" + history.length + ")";
+  }
+
+  function renderHistoryList() {
+    el.historyList.innerHTML = "";
+    if (history.length === 0) {
+      var empty = document.createElement("p");
+      empty.className = "history-empty";
+      empty.textContent = "まだ記録がありません。";
+      el.historyList.appendChild(empty);
+      return;
+    }
+    history.forEach(function (entry) {
+      var item = document.createElement("div");
+      item.className = "history-item";
+
+      var headerBtn = document.createElement("button");
+      headerBtn.className = "history-header";
+      var dateSpan = document.createElement("span");
+      dateSpan.className = "history-date";
+      dateSpan.textContent = formatDate(entry.timestamp);
+      var previewSpan = document.createElement("span");
+      previewSpan.className = "history-preview";
+      previewSpan.textContent = entry.transcript.slice(0, 24) + (entry.transcript.length > 24 ? "…" : "");
+      headerBtn.appendChild(dateSpan);
+      headerBtn.appendChild(previewSpan);
+
+      var body = document.createElement("div");
+      body.className = "history-body";
+      if (expandedId === entry.id) body.classList.add("show");
+
+      if (entry.hasSections) {
+        MARKS.forEach(function (mark) {
+          if (!entry.sections[mark]) return;
+          var wrap = document.createElement("div");
+          wrap.style.marginBottom = "12px";
+          var h4 = document.createElement("h4");
+          h4.className = "history-section-title";
+          h4.textContent = mark.replace("■", "");
+          var p = document.createElement("p");
+          p.className = "history-section-body";
+          p.textContent = entry.sections[mark];
+          wrap.appendChild(h4);
+          wrap.appendChild(p);
+          body.appendChild(wrap);
+        });
+      } else {
+        var p = document.createElement("p");
+        p.className = "history-section-body";
+        p.style.marginTop = "12px";
+        p.textContent = entry.raw;
+        body.appendChild(p);
+      }
+
+      headerBtn.addEventListener("click", function () {
+        expandedId = expandedId === entry.id ? null : entry.id;
+        renderHistoryList();
+      });
+
+      item.appendChild(headerBtn);
+      item.appendChild(body);
+      el.historyList.appendChild(item);
+    });
+  }
+
+  el.historyToggle.addEventListener("click", function () {
+    el.historyList.classList.toggle("show");
+    if (el.historyList.classList.contains("show")) renderHistoryList();
+    renderHistoryToggle();
+  });
+
+  /* ---------- init ---------- */
+  setPhase("idle");
+  loadHistory();
+  if (!apiKey) openSettings();
+})();
+</script>
+</body>
+</html>
